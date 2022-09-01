@@ -24,4 +24,5 @@ import Route from '@ioc:Adonis/Core/Route'
   Route.get('/select', 'CrudsController.select')
   Route.post('/update', 'CrudsController.update')
   Route.post('/delete', 'CrudsController.delete')
+  Route.get('/join', 'CrudsController.join')
 }
