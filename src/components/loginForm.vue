@@ -39,9 +39,10 @@
             v-model="select"
             :items="items"
             :rules="[v => !!v || 'select one city']"
-            label="Select your city"
+            label="city"
             required
           ></v-select>
+          <p>Interest</p>
           <v-checkbox 
           v-model="selected"
           v-for='i in names' 
@@ -53,7 +54,7 @@
             </v-checkbox>
         </v-container>
         <v-btn
-        v-on:click="validate()"
+        @click="validate()"
         color="white"
         class="mr-4"
               >
@@ -61,6 +62,39 @@
       </v-btn>
     
     </v-form>
+    <v-dialog v-model="dialog" width="1000px" class="mr-4">
+      <template v-slot:activator="{ on, attrs }">
+          <v-btn color="green " dark v-bind="attrs" v-on="on">
+              PopUP
+          </v-btn>
+      </template>
+      <v-card>
+          <v-card-title class="text-h5">
+              Form Data
+          </v-card-title>
+          <v-card-text>
+              <v-data-table>
+                  <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        dark
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        New Item
+                      </v-btn>
+                    </template>
+              </v-data-table>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red" text @click="dialog = false">
+                  CONFIRM
+              </v-btn>
+          </v-card-actions>
+      </v-card>
+  </v-dialog>
 </v-app>
 
 </template>
@@ -78,6 +112,7 @@
     nameRules: [
         v => !!v || 'Name is required',
         v => (v && v.length <= 20) || 'Name must be less than 20 characters',
+        v => /^[a-zA-Z]+$/.test(v) || 'Name must be valid'
       ],
         emailRules: [
         v => !!v || 'E-mail is required',
@@ -86,7 +121,7 @@
       phrules:[
         v => !!v|| 'mobile number is required',
         v => (v && v.length <=11) || 'mobile number must be 10 numbers',
-      ],
+        v => /^[0-9]+$/.test(v) || 'Mobile Number must be valid'      ],
       city: null,
         items:[
         'Chennai','madurai','Theni','Thanjavur','Trichy','Sivagangai','korkai','Tutukorin',
@@ -114,7 +149,7 @@
             names:this.selected,
           }
           console.log(JSON.stringify(arr))
-    }
-}
-};
+          }
+      }
+    };
 </script>
