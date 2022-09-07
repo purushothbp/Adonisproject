@@ -3,9 +3,7 @@
     <v-form ref="form"
     v-model="valid"
     lazy-validation
-  >
-        
-        <v-container>
+  >   <v-container>
             <v-text-field
             v-model="name"
             :counter="20"
@@ -13,7 +11,6 @@
             label="Name"
             required
           ></v-text-field>
-      
           <v-text-field
             v-model="email"
             :rules="emailRules"
@@ -52,8 +49,7 @@
           :label="i.name"
           :value="i.name"
           hide-details
-          required 
-          >
+          required>
             </v-checkbox>
         </v-container>
         <v-btn
@@ -93,12 +89,10 @@
       ],
       city: null,
         items:[
-        'Chennai' , 
-        'madurai' , 
-        'Theni' , 
-        'Thanjavur'
+        'Chennai','madurai','Theni','Thanjavur','Trichy','Sivagangai','korkai','Tutukorin',
+        'Thirunelveli','Vilupuram','Thiruvallur','Chengalpattu','Virudhunagar','Sivagasi'
       ],
-      
+
       names:[
         {id:1,name:'Kabadi'},
         {id:2,name:'cricket'} , 
@@ -121,8 +115,6 @@
           }
           console.log(JSON.stringify(arr))
     }
-}  
-
- 
+}
 };
 </script>
