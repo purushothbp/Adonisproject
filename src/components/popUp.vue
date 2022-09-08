@@ -1,10 +1,39 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="details"
-    sort-by="age"
-    class="elevation-1"
-  >
+  <v-simple-table>
+  <thead>
+    <tr><th >Name</th>
+    <th class="text-left">E-mail</th>
+    <th class="text-left">Mobile</th>
+    <th class="text-left">Gender</th>
+    <th class="text-left">City</th>
+    <th class="text-left">Interests</th>
+    <th class="text-left">action</th></tr>
+  </thead>
+  <tbody>
+    <tr v-for="item in details" :key="item.name">
+      <td>{{item.name}}</td>
+      <td>{{item.email}}</td>
+      <td>{{item.mobile}}</td>
+      <td>{{item.gender}}</td>
+      <td>{{item.city}}</td>
+      <td>{{item.interest}}</td>
+      <td>
+        <v-icon
+        small
+        class="mr-2"
+        @click="editItem(item)"
+      >
+        mdi-pencil
+      </v-icon>
+      <v-icon
+        small
+        @click="deleteItem(item)"
+      >
+        mdi-delete
+      </v-icon>
+      </td>
+    </tr>
+  </tbody>
     <template v-slot:top>
       <v-toolbar
         flat
@@ -22,7 +51,7 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              color="green"
+              color="black"
               dark
               class="mb-2"
               v-bind="attrs"
@@ -108,7 +137,7 @@
                 Cancel
               </v-btn>
               <v-btn
-                color="white"
+                color="green"
                 text 
                 @click="save"
               >
@@ -129,7 +158,7 @@
           </v-card>
         </v-dialog>
       </v-toolbar>
-    </template>//eslint-disable-next-line
+    </template>
     <template v-slot:[`item.actions`]="{ item }">
       <v-icon
         small
@@ -145,7 +174,7 @@
         mdi-delete
       </v-icon>
     </template>
-  </v-data-table>
+  </v-simple-table>
 </template>
 
 
@@ -254,7 +283,7 @@
       save () {
         if (this.editedIndex > -1) {
           Object.assign(this.details[this.editedIndex], this.editedItem)
-        } else {
+        } else if(this.$refs.form.validate()){
           this.details.push(this.editedItem)
         }
         this.$refs.form.resetValidation()
