@@ -6,31 +6,23 @@
     <th class="text-left">Mobile</th>
     <th class="text-left">Gender</th>
     <th class="text-left">City</th>
-    <th class="text-left">Interests</th>
     <th class="text-left">action</th></tr>
   </thead>
   <tbody>
-    <tr v-for="item in details" :key="item.name">
+    <tr v-for="item in forms" :key="item.id">
       <td>{{item.name}}</td>
       <td>{{item.email}}</td>
       <td>{{item.mobile}}</td>
       <td>{{item.gender}}</td>
       <td>{{item.city}}</td>
-      <td>{{item.interest}}</td>
       <td>
+        <v-btn @click="editItem(item)"> 
         <v-icon
-        small
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon>
+        small>mdi-pencil
+      </v-icon></v-btn>
+      <v-btn @click="deleteItem(item.id)">
+      <v-icon  small > 
+        mdi-delete </v-icon></v-btn>
       </td>
     </tr>
   </tbody>
@@ -47,8 +39,7 @@
         <v-spacer></v-spacer>
         <v-dialog
           v-model="dialog"
-          max-width="500px"
-        >
+          max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               color="black"
@@ -68,10 +59,9 @@
               <v-container>
                   <v-form
                   ref="form"
-                  v-model="valid"
                     lazy-validation>
                     <v-text-field
-                      v-model="editedItem.name"
+                      v-model="name"
                       label="name"
                       placeholder="enter name"
                       :rules="[
@@ -80,16 +70,16 @@
                       ]"
                     ></v-text-field>
                     <v-text-field
-                      v-model="editedItem.mobile"
+                      v-model="mobile"
                       :rules="[
                           v => !!v || 'mobile no  is required',
-                          v => (/[0-9]/.test(v)) || 'mobile number must be valid',
-                          v =>v && v.length==10|| 'mobile no must be of size 10']"
+                          v =>v && v.length==10|| 'mobile no must be of size 10',
+                          v => (/[0-9]/.test(v)) || 'mobile number must be valid']"
                       label="mobile no"
                     ></v-text-field>
                     <v-radio-group
                     column
-                    v-model="editedItem.gender"
+                    v-model="gender"
                      label="Gender">
                      <v-radio
                      label="Male"
@@ -101,8 +91,8 @@
                      ></v-radio>
                   </v-radio-group>
                   <v-autocomplete
-                  v-model="editedItem.city"
-                  :items="editedItem.cities"
+                  v-model="city"
+                  :items="cities"
                   dense
                   :rules="[v => !!v || 'city is required']"
                   label="City"
@@ -110,20 +100,12 @@
                   required
                 ></v-autocomplete>
                     <v-text-field
-                      v-model="editedItem.email"
+                      v-model="email"
                       :rules="[
                           v => !!v || 'E-mail is required',
                           v => /.+@.+\..+/.test(v)  || 'E-mail must be valid']"
                       label="E-mail"
                     ></v-text-field>
-                    <v-select
-                     v-model="editedItem.interest"
-                     :items="editedItem.list"
-                     label="Select"
-                       multiple
-                       hint="select yout interests"
-                       persistent-hint
-                       ></v-select>
                   </v-form>
               </v-container>
             </v-card-text>
@@ -136,43 +118,12 @@
               >
                 Cancel
               </v-btn>
-              <v-btn
-                color="green"
-                text 
-                @click="save"
-              >
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h6">Do you want to delete this DATA?</v-card-title>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
-              <v-spacer></v-spacer>
+              <v-btn v-if="fork" @click="insert"> submit </v-btn>
+              <v-btn v-else @click="save"> Save </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
       </v-toolbar>
-    </template>
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon>
     </template>
   </v-simple-table>
 </template>
@@ -183,27 +134,17 @@ import  Vue from 'vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 Vue.use(VueAxios, axios)
+var band
   export default {
     data: () => ({
+      form : {},
       dialog: false,
+      fork:true,
       dialogDelete: false,
-      headers: [
-        {
-          text: 'Name',
-          align: 'start',
-          sortable: false,
-          value: 'name',
-        },
-        { text: 'gender', value: 'gender' },
-        { text: 'city', value: 'city' },
-        { text: 'E-mail', value: 'email' },
-        {text:'interest',value:'interest'},
-        {text:'Phone No',value:'mobile'},
-        { text: 'actions', value: 'actions', sortable: false },
-      ],
       details: [],
       editedIndex: -1,
-      editedItem: {
+      forms:undefined,
+    
         name: '',
         age: '',
         gender: '',
@@ -213,23 +154,7 @@ Vue.use(VueAxios, axios)
         'Chennai','madurai','Theni','Thanjavur','Trichy','Sivagangai','korkai','Tutukorin',
         'Thirunelveli','Vilupuram','Thiruvallur','Chengalpattu','Virudhunagar','Sivagasi'
       ],
-        list:['Kabadi','cricket','Hockey','kho kho','Volley ball'],
-        interest:[],
         mobile:'',
-      },
-      defaultItem: {
-        name: '',
-        age: '',
-        gender:'',
-        city: '',
-        email: '',
-        cities:[
-        'Chennai','madurai','Theni','Thanjavur','Trichy','Sivagangai','korkai','Tutukorin',
-        'Thirunelveli','Vilupuram','Thiruvallur','Chengalpattu','Virudhunagar','Sivagasi'
-      ],
-        list:['Kabadi','cricket','Hockey','kho kho','Volley ball'],
-        mobile:'',
-      },
     }),
     computed: {
       formTitle () {
@@ -244,68 +169,69 @@ Vue.use(VueAxios, axios)
         val || this.closeDelete()
       },
     },
-    created () {
-      this.initialize()
-    },
+   
     mounted(){
-    Vue.axios.get("http://127.0.0.1:3333/read").
+    Vue.axios.get("http://127.0.0.1:43163/select").
             then((res)=>{
             this.forms=res.data;
             console.warn(res.data);
       })},
       methods: {
+      async  insert(){
+       await Vue.axios.post("http://127.0.0.1:43163/insert",{name:this.name, city:this.city,
+          mobile:this.mobile, gender:this.gender, email:this.email,}).then((res)=>{
+            console.warn(res)          
+          })
+        },
         read(){
-            Vue.axios.get("http://127.0.0.1:3333/readForm").
+            Vue.axios.get("http://127.0.0.1:43163/select").
             then((res)=>{
             this.forms=res.data;
             console.warn(res.data);
             })
         },
-      clearForm(){
-        this.name = '',
-        this.gender = '',
-        this.city = 0,
-        this.email =  '',
-        this.interest = [],
-        this.mobile = ''
+        async deleteItem(id){
+           await axios.delete(`http://127.0.0.1:43163/delete/${id}`)
+           this.read()
+         },
+         editItem(item) {
+      this.fork=false
+      this.dialog = true
+      band = item
+      this.name = item.name
+      this.email = item.email
+      this.gender = item.gender
+      this.city = item.city
+      this.mobile=item.mobile
+    
+    },
+    async save() {
+      this.button=true
+      band.name = this.name
+      band.email = this.email
+      band.gender = this.gender
+      band.city = this.city
+      band.mobile=this.mobile
+      await axios.put(`http://127.0.0.1:43163/update/${band.id}`, {
+           name : this.name,
+           email : this.email,
+           gender : this.gender,
+           city : this.city,
+           mobile:this.mobile
+      })
+      .then(response => {
+          console.log(response);
+        })
       },
-      editItem (item) {
-        this.editedIndex = this.details.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
-      },
-      deleteItem (item) {
-        this.editedIndex = this.details.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialogDelete = true
-      },
-      deleteItemConfirm () {
-        this.details.splice(this.editedIndex, 1)
-        this.closeDelete()
-      },
-      close () {
+      close(){
         this.dialog = false
         this.$nextTick(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
         })
-      },
-      closeDelete () {
-        this.dialogDelete = false
-        this.$nextTick(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        })
-      },
-      save () {
-        if (this.editedIndex > -1) {
-          Object.assign(this.details[this.editedIndex], this.editedItem)
-        } else if(this.$refs.form.validate()){
-          this.details.push(this.editedItem)
-        }
-        this.$refs.form.resetValidation()
-        this.close()
-      },
+      this.dialog=false
+       this.$refs.form.reset()
+    },
     },
   }
 </script>
