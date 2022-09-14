@@ -10,7 +10,7 @@
   </thead>
   <tbody>
     <tr v-for="item in forms" :key="item.id">
-      <td>{{item.name}}</td>
+      <td>{{item.name | place}}</td>
       <td>{{item.email}}</td>
       <td>{{item.mobile}}</td>
       <td>{{item.gender}}</td>
@@ -50,6 +50,7 @@
             >
               POPUP
             </v-btn>
+            <FindVal @searchTable="getData($event)"/>
           </template>
           <v-card>
             <v-card-title>
@@ -133,105 +134,124 @@
 import  Vue from 'vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import FindVal from './findVal.vue'
 Vue.use(VueAxios, axios)
 var band
   export default {
     data: () => ({
-      form : {},
-      dialog: false,
-      fork:true,
-      dialogDelete: false,
-      details: [],
-      editedIndex: -1,
-      forms:undefined,
-    
-        name: '',
-        age: '',
-        gender: '',
+        form: {},
+        dialog: false,
+        fork: true,
+        dialogDelete: false,
+        details: [],
+        val: "",
+        editedIndex: -1,
+        forms: undefined,
+        name: "",
+        age: "",
+        gender: "",
         city: 0,
-        email: '',
-        cities:[
-        'Chennai','madurai','Theni','Thanjavur','Trichy','Sivagangai','korkai','Tutukorin',
-        'Thirunelveli','Vilupuram','Thiruvallur','Chengalpattu','Virudhunagar','Sivagasi'
-      ],
-        mobile:'',
+        email: "",
+        cities: [
+            "Chennai",
+            "madurai",
+            "Theni",
+            "Thanjavur",
+            "Trichy",
+            "Sivagangai",
+            "korkai",
+            "Tutukorin",
+            "Thirunelveli",
+            "Vilupuram",
+            "Thiruvallur",
+            "Chengalpattu",
+            "Virudhunagar",
+            "Sivagasi"
+        ],
+        mobile: "",
     }),
     computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-      },
+        formTitle() {
+            return this.editedIndex === -1 ? "New Item" : "Edit Item";
+        },
     },
     watch: {
-      dialog (val) {
-        val || this.close()
-      },
-      dialogDelete (val) {
-        val || this.closeDelete()
-      },
-    },
-   
-    mounted(){
-    Vue.axios.get("http://127.0.0.1:43163/select").
-            then((res)=>{
-            this.forms=res.data;
-            console.warn(res.data);
-      })},
-      methods: {
-      async  insert(){
-       await Vue.axios.post("http://127.0.0.1:43163/insert",{name:this.name, city:this.city,
-          mobile:this.mobile, gender:this.gender, email:this.email,}).then((res)=>{
-            console.warn(res)          
-          })
+        dialog(val) {
+            val || this.close();
         },
-        read(){
-            Vue.axios.get("http://127.0.0.1:43163/select").
-            then((res)=>{
-            this.forms=res.data;
+        dialogDelete(val) {
+            val || this.closeDelete();
+        },
+    },
+    mounted() {
+        Vue.axios.get("http://127.0.0.1:3333/select").
+            then((res) => {
+            this.forms = res.data;
             console.warn(res.data);
+        });
+    },
+    methods: {
+        async insert() {
+            await Vue.axios.post("http://127.0.0.1:3333/insert", { name: this.name, city: this.city, mobile: this.mobile, gender: this.gender, email: this.email, }).then((res) => {
+                console.warn(res);
+            });
+        },
+        read() {
+            Vue.axios.get("http://127.0.0.1:3333/select").
+                then((res) => {
+                this.forms = res.data;
+                console.warn(res.data);
+            });
+        },
+        async deleteItem(id) {
+            await axios.delete(`http://127.0.0.1:3333/delete/${id}`);
+            this.read();
+        },
+        Changed(value) {
+            console.log(value);
+            this.list = value.data;
+        },
+        editItem(item) {
+            this.fork = false;
+            this.dialog = true;
+            band = item;
+            this.name = item.name;
+            this.email = item.email;
+            this.gender = item.gender;
+            this.city = item.city;
+            this.mobile = item.mobile;
+        },
+        async save() {
+            this.button = true;
+            band.name = this.name;
+            band.email = this.email;
+            band.gender = this.gender;
+            band.city = this.city;
+            band.mobile = this.mobile;
+            await axios.put(`http://127.0.0.1:3333/update/${band.id}`, {
+                name: this.name,
+                email: this.email,
+                gender: this.gender,
+                city: this.city,
+                mobile: this.mobile
             })
+                .then(response => {
+                console.log(response);
+            });
         },
-        async deleteItem(id){
-           await axios.delete(`http://127.0.0.1:43163/delete/${id}`)
-           this.read()
-         },
-         editItem(item) {
-      this.fork=false
-      this.dialog = true
-      band = item
-      this.name = item.name
-      this.email = item.email
-      this.gender = item.gender
-      this.city = item.city
-      this.mobile=item.mobile
-    
+        close() {
+            this.dialog = false;
+            this.$nextTick(() => {
+                this.editedItem = Object.assign({}, this.defaultItem);
+                this.editedIndex = -1;
+            });
+            this.dialog = false;
+            this.$refs.form.reset();
+        },
+        getData(value){
+          this.forms=value.data
+        }
     },
-    async save() {
-      this.button=true
-      band.name = this.name
-      band.email = this.email
-      band.gender = this.gender
-      band.city = this.city
-      band.mobile=this.mobile
-      await axios.put(`http://127.0.0.1:43163/update/${band.id}`, {
-           name : this.name,
-           email : this.email,
-           gender : this.gender,
-           city : this.city,
-           mobile:this.mobile
-      })
-      .then(response => {
-          console.log(response);
-        })
-      },
-      close(){
-        this.dialog = false
-        this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-        })
-      this.dialog=false
-       this.$refs.form.reset()
-    },
-    },
-  }
+    components: { FindVal }
+}
 </script>

@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import App from './App.vue'
+import findVal from './components/findVal.vue'
 import vuetify from './plugins/vuetify'
 
 
 Vue.config.productionTip = false
-
+Vue.component('findVal',findVal)
 Vue.filter('place',function(str){
   if(str.length>10){
     return str.slice(0,10)+'...'
