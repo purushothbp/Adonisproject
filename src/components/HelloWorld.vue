@@ -62,8 +62,8 @@
                   ref="form"
                     lazy-validation>
                     <v-text-field
-                      v-model="name"
-                      label="name"
+                      v-model="formInput.name"
+                      label="Name"
                       placeholder="enter name"
                       :rules="[
                         v => !!v || 'Name is required',
@@ -71,7 +71,7 @@
                       ]"
                     ></v-text-field>
                     <v-text-field
-                      v-model="mobile"
+                      v-model="formInput.mobile"
                       :rules="[
                           v => !!v || 'mobile no  is required',
                           v =>v && v.length==10|| 'mobile no must be of size 10',
@@ -80,7 +80,7 @@
                     ></v-text-field>
                     <v-radio-group
                     column
-                    v-model="gender"
+                    v-model="formInput.gender"
                      label="Gender">
                      <v-radio
                      label="Male"
@@ -92,7 +92,7 @@
                      ></v-radio>
                   </v-radio-group>
                   <v-autocomplete
-                  v-model="city"
+                  v-model="formInput.city"
                   :items="cities"
                   dense
                   :rules="[v => !!v || 'city is required']"
@@ -101,7 +101,7 @@
                   required
                 ></v-autocomplete>
                     <v-text-field
-                      v-model="email"
+                      v-model="formInput.email"
                       :rules="[
                           v => !!v || 'E-mail is required',
                           v => /.+@.+\..+/.test(v)  || 'E-mail must be valid']"
@@ -132,13 +132,15 @@
 
 <script>
 import  Vue from 'vue'
+import reading from '../services/api'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import FindVal from './findVal.vue'
 Vue.use(VueAxios, axios)
 var band
   export default {
-    data: () => ({
+    data(){
+      return{
         form: {},
         dialog: false,
         fork: true,
@@ -147,11 +149,14 @@ var band
         val: "",
         editedIndex: -1,
         forms: undefined,
+        formInput:{
         name: "",
         age: "",
         gender: "",
         city: 0,
         email: "",
+        mobile: "",
+    },
         cities: [
             "Chennai",
             "madurai",
@@ -168,8 +173,10 @@ var band
             "Virudhunagar",
             "Sivagasi"
         ],
-        mobile: "",
-    }),
+        
+    }
+  },
+
     computed: {
         formTitle() {
             return this.editedIndex === -1 ? "New Item" : "Edit Item";
@@ -183,26 +190,21 @@ var band
             val || this.closeDelete();
         },
     },
-    mounted() {
-        Vue.axios.get("http://127.0.0.1:3333/select").
-            then((res) => {
-            this.forms = res.data;
-            console.warn(res.data);
-        });
+    async mounted() {
+      this.formInput =  await reading()
+
     },
     methods: {
         async insert() {
-            await Vue.axios.post("http://127.0.0.1:3333/insert", { name: this.name, city: this.city, mobile: this.mobile, gender: this.gender, email: this.email, }).then((res) => {
+            await Vue.axios.post("http://127.0.0.1:3333/insert", this.formInput)
+            .then((res) => {
                 console.warn(res);
             });
         },
-        read() {
-            Vue.axios.get("http://127.0.0.1:3333/select").
-                then((res) => {
-                this.forms = res.data;
-                console.warn(res.data);
-            });
+        async read(){
+          this.formInput =  await reading()
         },
+
         async deleteItem(id) {
             await axios.delete(`http://127.0.0.1:3333/delete/${id}`);
             this.read();
@@ -215,26 +217,13 @@ var band
             this.fork = false;
             this.dialog = true;
             band = item;
-            this.name = item.name;
-            this.email = item.email;
-            this.gender = item.gender;
-            this.city = item.city;
-            this.mobile = item.mobile;
+            this.formInput={name :item.name,email : item.email,
+            gender : item.gender,city : item.city,mobile : item.mobile
+            }
         },
         async save() {
             this.button = true;
-            band.name = this.name;
-            band.email = this.email;
-            band.gender = this.gender;
-            band.city = this.city;
-            band.mobile = this.mobile;
-            await axios.put(`http://127.0.0.1:3333/update/${band.id}`, {
-                name: this.name,
-                email: this.email,
-                gender: this.gender,
-                city: this.city,
-                mobile: this.mobile
-            })
+            await axios.put(`http://127.0.0.1:3333/update/${band.id}`,this.formInput)
                 .then(response => {
                 console.log(response);
             });
