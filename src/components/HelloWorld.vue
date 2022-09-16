@@ -1,11 +1,26 @@
 <template>
   <v-simple-table>
   <thead>
-    <tr><th>Name</th>
-    <th class="text-left">E-mail</th>
-    <th class="text-left">Mobile</th>
-    <th class="text-left">Gender</th>
-    <th class="text-left">City</th>
+    <tr><th>Name
+      <button @click="asc('/nameA')"><v-icon x-small>mdi-arrow-up</v-icon></button>
+      <button @click="desc('/nameD')"><v-icon x-small>mdi-arrow-down</v-icon></button>
+    </th>
+    <th class="text-left">E-mail
+      <button @click="asc('/emailA')"><v-icon x-small>mdi-arrow-up</v-icon></button>
+      <button @click="desc('/emailD')"><v-icon x-small>mdi-arrow-down</v-icon></button>
+    </th>
+    <th class="text-left">Mobile
+      <button @click="asc('/mobileA')"><v-icon x-small>mdi-arrow-up</v-icon></button>
+      <button @click="desc('/mobileD')"><v-icon x-small>mdi-arrow-down</v-icon></button>
+    </th>
+    <th class="text-left">Gender
+      <button @click="asc('/genderA')"><v-icon x-small>mdi-arrow-up</v-icon></button>
+      <button @click="desc('/genderD')"><v-icon x-small>mdi-arrow-down</v-icon></button>
+    </th>
+    <th class="text-left">City
+      <button @click="asc('/cityA')"><v-icon x-small>mdi-arrow-up</v-icon></button>
+      <button @click="desc('/cityD')"><v-icon x-small>mdi-arrow-down</v-icon></button>
+    </th>
     <th class="text-left">action</th></tr>
   </thead>
   <tbody>
@@ -147,16 +162,18 @@ var band
         dialogDelete: false,
         details: [],
         editedIndex: -1,
+        index:"",
         forms: undefined,
         formInput:{
         name: "",
-        age: "",
         gender: "",
-        city: 0,
+        city: "",
         email: "",
         mobile: "",
       },
       VUE_APP_READ:process.env.VUE_APP_READ,
+      sortIndex: null,
+      sortDir: null,
       cities: [
             "Chennai",
             "madurai",
@@ -246,7 +263,20 @@ var band
         },
         getData(value){
           this.forms=value.data
-        }
+        },
+
+        async asc(val){
+          await api.read(`${this.VUE_APP_READ}${val}`).then((res)=>{
+            console.warn(res);
+            this.forms=res.data
+          })
+        },
+        async desc(val){
+          await api.read(`${this.VUE_APP_READ}${val}`).then((res)=>{
+            console.warn(res);
+            this.forms=res.data
+          })
+        },
     },
     components: { FindVal }
 }
