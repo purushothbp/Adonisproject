@@ -1,7 +1,7 @@
 <template>
   <v-simple-table>
   <thead>
-    <tr><th >Name</th>
+    <tr><th>Name</th>
     <th class="text-left">E-mail</th>
     <th class="text-left">Mobile</th>
     <th class="text-left">Gender</th>
@@ -132,7 +132,7 @@
 
 <script>
 import  Vue from 'vue'
-import reading from '../services/api'
+import api from './test/apitest'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import FindVal from './findVal.vue'
@@ -146,7 +146,6 @@ var band
         fork: true,
         dialogDelete: false,
         details: [],
-        val: "",
         editedIndex: -1,
         forms: undefined,
         formInput:{
@@ -156,8 +155,9 @@ var band
         city: 0,
         email: "",
         mobile: "",
-    },
-        cities: [
+      },
+      VUE_APP_READ:process.env.VUE_APP_READ,
+      cities: [
             "Chennai",
             "madurai",
             "Theni",
@@ -190,28 +190,42 @@ var band
             val || this.closeDelete();
         },
     },
+
     async mounted() {
-      this.formInput =  await reading()
+      this.read()
 
     },
     methods: {
         async insert() {
-            await Vue.axios.post("http://127.0.0.1:3333/insert", this.formInput)
-            .then((res) => {
-                console.warn(res);
-            });
+            await api.insert(`${this.VUE_APP_READ}/insert`,this.formInput).then((res)=>{
+              console.warn(res);
+              this.forms=res.data
+            })
         },
         async read(){
-          this.formInput =  await reading()
+          await api.read(`${this.VUE_APP_READ}/select`).then((res)=>{
+            console.warn(res);
+            this.forms=res.data
+          })
         },
 
         async deleteItem(id) {
-            await axios.delete(`http://127.0.0.1:3333/delete/${id}`);
+            await api.delete(`${this.VUE_APP_READ}/delete/${id}`).then((res)=>{
+              console.warn(res)
+              this.forms=res.data
+            })
             this.read();
         },
         Changed(value) {
             console.log(value);
             this.list = value.data;
+        },
+        async save() {
+            this.button = true;
+            await api.update(`${this.VUE_APP_READ}/update/${band.id}`,this.formInput)
+                .then((res) => {
+                console.warn((res));
+            });
         },
         editItem(item) {
             this.fork = false;
@@ -220,13 +234,6 @@ var band
             this.formInput={name :item.name,email : item.email,
             gender : item.gender,city : item.city,mobile : item.mobile
             }
-        },
-        async save() {
-            this.button = true;
-            await axios.put(`http://127.0.0.1:3333/update/${band.id}`,this.formInput)
-                .then(response => {
-                console.log(response);
-            });
         },
         close() {
             this.dialog = false;
