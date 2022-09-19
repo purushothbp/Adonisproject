@@ -78,20 +78,22 @@
                     lazy-validation>
                     <v-text-field
                       v-model="formInput.name"
-                      label="Name"
+                      label="Enter your Name"
                       placeholder="enter name"
                       :rules="[
                         v => !!v || 'Name is required',
-                        v => (v && v.length <= 10) || 'Name must be less than 10 characters',
+                        v => (v && v.length <= 15) || 'Name must be less than 15 characters',
+                        v=>(/^[A-Za-z]+$/.test(v)) || 'Enter the valid name',
                       ]"
                     ></v-text-field>
                     <v-text-field
                       v-model="formInput.mobile"
+                      v-thousand-seperator="formInput.mobile"
                       :rules="[
                           v => !!v || 'mobile no  is required',
                           v =>v && v.length==10|| 'mobile no must be of size 10',
-                          v => (/[0-9]/.test(v)) || 'mobile number must be valid']"
-                      label="mobile no"
+                          v => (/^[0-9]+$/.test(v)) || 'mobile number must be valid',]"
+                      label="Enter mobile number"
                     ></v-text-field>
                     <v-radio-group
                     column
@@ -120,7 +122,7 @@
                       :rules="[
                           v => !!v || 'E-mail is required',
                           v => /.+@.+\..+/.test(v)  || 'E-mail must be valid']"
-                      label="E-mail"
+                      label="Enter E-mail"
                     ></v-text-field>
                   </v-form>
               </v-container>

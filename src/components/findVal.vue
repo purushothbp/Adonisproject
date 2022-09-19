@@ -1,7 +1,6 @@
 <template>
     <div>
         <input type="text" v-model="val" placeholder="search" v-on:keydown="search(val)">
-        <button @click="search(val)" class="mr-4"></button>
     </div>
 </template>
 
